@@ -1,22 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faL, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { success, taskExists, deleted, empty } from "../component/fucntions/tostify";
+import date from "./fucntions/day";
 
 const ToDo = () => {
-  const date = new Date();
-  const daysOfWeek = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-
-  const today = daysOfWeek[date.getDay()];
+  const today =date
   const [tasks, SetTask] = useState(() => {
     try {
       const localTask = localStorage.getItem("tasks");
@@ -27,6 +18,9 @@ const ToDo = () => {
     }
   });
 
+
+  //states
+
   const [text, setText] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(null);
@@ -34,37 +28,32 @@ const ToDo = () => {
   const handelSubmit = (e) => {
     e.preventDefault();
     if (tasks.some((tasks) => tasks.toLowerCase() == text.toLowerCase())) {
-      const notify = () => toast.warning("Task already exist");
-      notify();
+        taskExists()
       return;
     }
     if (isEditing) {
-      console.log("hi");
-      console.log(currentTaskIndex);
       const updatedTask = tasks.map((task, index) => {
         return index == currentTaskIndex ? text : task;
       });
-      console.log(updatedTask);
       SetTask(updatedTask);
       localStorage.setItem("task", JSON.stringify(updatedTask));
       setIsEditing(false);
       setCurrentTaskIndex(null);
+      setText("");
       return;
     } else {
       if (text.trim()) {
         const newTask = [...tasks, text];
         SetTask(newTask);
         localStorage.setItem("tasks", JSON.stringify(newTask));
-        const notify = () => toast.success("Task added successFull");
-        notify();
+        success()
       } else {
-        const notify = () => toast.error("Task is empty");
-        notify();
+       empty()
         return;
       }
 
-      setText("");
-    }
+    setText("");
+      }
   };
 
   const handleEdit = (index) => {
@@ -77,8 +66,7 @@ const ToDo = () => {
     const deleteTask = tasks.filter((value, i) => {
       return i !== index;
     });
-    const notify = () => toast.success("successFully Deleted");
-    notify();
+    deleted()
     SetTask(deleteTask);
   };
 
@@ -87,6 +75,7 @@ const ToDo = () => {
   }, [tasks]);
 
   return (
+    <>
     <div className="toDo">
       <div className="inputTodo">
         <ToastContainer />
@@ -101,10 +90,13 @@ const ToDo = () => {
               }}
               placeholder="Enter your Task..."
             />
-
-            <button className="add" type="submit">
-              Add
-            </button>
+              {isEditing?(  <button className="add" type="submit">
+              update
+            </button>):
+            (  <button className="add" type="submit">
+              add
+            </button>)}   
+          
           </form>
         </div>
       </div>
@@ -136,6 +128,7 @@ const ToDo = () => {
         )}
       </ul>
     </div>
+    </>
   );
 };
 
